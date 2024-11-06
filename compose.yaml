@@ -1,0 +1,35 @@
+version: "3.2"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    environment:
+       - RABBITMQ_DEFAULT_PASS=pass
+       - RABBITMQ_DEFAULT_USER=user
+    ports:
+        - 5672:5672
+        - 15672:15672
+  mongodb:
+    container_name: 'mongodb'
+    image: mongo:latest
+    ports:
+      - '27018:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+      - MONGO_INITDB_DATABASE=babylon
+    volumes: 
+      - mymongodata:/data/db
+  crud:
+    depends_on:
+      mongodb:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    build: crud
+    ports:
+      - 8090:8080
+  listener:
+    build: listener
+volumes:
+  mymongodata:
